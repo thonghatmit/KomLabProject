@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Web-GUI for Controller</title>
+        <!-- Bootstrap 5.3 -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+              rel="stylesheet"
+              integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+              crossorigin="anonymous"/>
+        <!-- Bootstrap Icons -->
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"/>
+    </head>
+    <body>
+        <div class="container gap-3 mt-4 mb-4">
+            <!-- Title with Reload button-->
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                {% if api_online == True %}
+                    <h1>
+                        Web-GUI for Controller <span class="badge bg-success">Online</span>
+                    </h1>
+                {% else %}
+                    <h1>
+                        Web-GUI for Controller <span class="badge bg-danger">Offline</span>
+                    </h1>
+                {% endif %}
+                <form action="/">
+                    <button class="btn btn-primary btn-lg">
+                        <span class="bi-arrow-clockwise"></span>&nbsp;Reload
+                    </button>
+                </form>
+            </div>
+            <!-- Controls -->
+            <a data-bs-toggle="collapse" data-bs-target="#controls">
+                <h2 class="mt-4 mb-4">Controls</h2>
+            </a>
+            <div id="controls" class="collapse show mb-4">
+                <div class="row">
+                    <!-- Setup -->
+                    <div class="col">
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Setup</h5>
+                                <div class="row g-2 align-items-left">
+                                    <form action="/Create_Interface" class="col-auto">
+                                        <button id="stat-btn" class="btn btn-outline-primary btn-sm">Create Interfaces</button>
+                                    </form>
+                                    <form action="/Run_Controller" class="col-auto">
+                                        <button id="stat-btn" class="btn btn-outline-primary btn-sm">Run Controller</button>
+                                    </form>
+                                </div>
+                                {% comment %}
+                                <div class="row g-2 align-items-left mt-3">
+                                    <form action="/start_client" class="col-auto">
+                                        <button class="btn btn-outline-success btn-sm">Start Client</button>
+                                    </form>
+                                    <form action="/stop_client" class="col-auto">
+                                        <button class="btn btn-outline-danger btn-sm">Stop Client</button>
+                                    </form>
+                                </div>
+                                {% endcomment %}
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Control Servers -->
+                    <div class="col">
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Control Servers</h5>
+                                <div class="row g-2 align-items-left mb-3">
+                                    <form action="/Start_Server_A" class="col-auto">
+                                        <button id="stat-btn" class="btn btn-outline-success btn-sm">Start Server A</button>
+                                    </form>
+                                    <form action="/Stop_Server_A" class="col-auto">
+                                        <button id="stat-btn" class="btn btn-outline-danger btn-sm">Stop Server A</button>
+                                    </form>
+                                </div>
+                                <div class="row g-2 align-items-left">
+                                    <form action="/Start_Server_B" class="col-auto">
+                                        <button id="stat-btn" class="btn btn-outline-success btn-sm">Start Server B</button>
+                                    </form>
+                                    <form action="/Stop_Server_B" class="col-auto">
+                                        <button id="stat-btn" class="btn btn-outline-danger btn-sm">Stop Server B</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Automatic Migration -->
+                    <div class="col">
+                        {% if auto_migration == True %}
+                            <div class="card bg-light mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Automatic Migration</h5>
+                                    <p class="card-text">Automatic Migration of Sessions form Server A to Server B is on.</p>
+                                    <form action="/set_auto_migration_off">
+                                        <button class="btn btn-danger btn-sm">Turn off</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="card bg-light mb-4" style="width:300px">
+                                <div class="card-body">
+                                    <h5 class="card-title">Automatic Migration</h5>
+                                    <p class="card-text">Automatic Migration of Sessions form Server A to Server B is off.</p>
+                                    <form action="/set_auto_migration_on">
+                                        <button class="btn btn-success btn-sm">Turn on</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <!-- Server A Sessions -->
+                <div class="col">
+                    {% if is_online_A == True %}
+                        <h2>
+                            Server A <span class="badge bg-success">Online</span>
+                        </h2>
+                        <ul class="list-group mt-4 mb-2">
+                            <li class="list-group-item bg-light d-flex justify-content-between align-items-center pt-3 pb-3">
+                                <div class="f fs-4">
+                                    Current Sessions <span class="badge bg-primary rounded-pill">{{ sessions_A | length }}</span>
+                                </div>
+                                <div class="row g-2 align-items-left">
+                                    <form action="/write_dummy_sessions_A" class="col-auto">
+                                        <button class="btn btn-primary">Add Dummy Session</button>
+                                    </form>
+                                    <form action="/migrate_all_to_B" class="col-auto">
+                                        <button class="btn btn-primary">Migrate all to B</button>
+                                    </form>
+                                </div>
+                            </li>
+                            {% for session in sessions_A %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-semibold fs-5 mb-1">
+                                                sessionID&nbsp;<span class="badge bg-secondary">{{ session.sid }}</span>
+                                                username&nbsp;<span class="badge bg-secondary">{{ session.username }}</span>
+                                            </div>
+                                            <p class="mb-1">
+                                                {{ session.calling_station_id }} ➡️ {{ session.called_station_id }}
+                                            </p>
+                                            {% if session.ip %}
+                                                <p class="mb-1">
+                                                    {{ session.ip }} ➡️ {{ session.peer_ip }}
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                        <form method="post" action="{% url 'gui:migrate_to_B' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="session" value="{{ session }}" />
+                                            <input type="submit" class="btn btn-primary btn-sm" value="Migrate to B" />
+                                        </form>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <!-- If Server A offline-->
+                        <h2>
+                            Server A <span class="badge bg-danger">Offline</span>
+                        </h2>
+                        <ul class="list-group  mt-4 mb-2">
+                            <li class="list-group-item bg-light">
+                                .
+                            </li>
+                        </ul>
+                    {% endif %}
+                </div>
+                <!-- Server B sessions -->
+                <div class="col">
+                    {% if is_online_B == True %}
+                        <h2>
+                            Server B <span class="badge bg-success">Online</span>
+                        </h2>
+                        <ul class="list-group mt-4 mb-2">
+                            <li class="list-group-item bg-light d-flex justify-content-between align-items-center pt-3 pb-3">
+                                <div class="f fs-4">
+                                    Current Sessions <span class="badge bg-primary rounded-pill">{{ sessions_B | length }}</span>
+                                </div>
+                                <div class="row g-2 align-items-left">
+                                    <form action="/write_dummy_sessions_B" class="col-auto">
+                                        <button class="btn btn-primary">
+                                            Add Dummy Session
+                                        </button>
+                                    </form>
+                                    <form action="/migrate_all_to_A" class="col-auto">
+                                        <button class="btn btn-primary">
+                                            Migrate all to A
+                                        </button>
+                                    </form>
+                                </div>
+                            </li>
+                            {% for session in sessions_B %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-semibold fs-5 mb-1">
+                                                sessionID&nbsp;<span class="badge bg-secondary">{{ session.sid }}</span>
+                                                username&nbsp;<span class="badge bg-secondary">{{ session.username }}</span>
+                                            </div>
+                                            <p class="mb-1">
+                                                {{ session.calling_station_id }} ➡️ {{ session.called_station_id }}
+                                            </p>
+                                            {% if session.ip %}
+                                                <p class="mb-1">
+                                                    {{ session.ip }} ➡️ {{ session.peer_ip }}
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                        <form method="post" action="{% url 'gui:migrate_to_A' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="session" value="{{ session }}" />
+                                            <input type="submit" class="btn btn-primary btn-sm" value="Migrate to A" />
+                                        </form>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <!-- If Server B offline-->
+                        <h2>
+                            Server B <span class="badge bg-danger">Offline</span>
+                        </h2>
+                        <ul class="list-group  mt-4 mb-2">
+                            <li class="list-group-item bg-light">
+                                .
+                            </li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- Bootstrap 5.3 -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+                    integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+                    crossorigin="anonymous"></script>
+        </div>
+    </body>
+</html>
